@@ -1,8 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 #include "car.h"
+#include <QPoint>
 #include <QSize>
-#include "car.h"
 
 class Game
 {
@@ -12,15 +12,25 @@ public:
     static const int num_checkpoints;
     static const int points[8][2];
     static const QSize RESOLUTION;
+
     const QString PATH_TO_BACKGROUND_PIXMAP;
     const QString PATH_TO_CAR_PIXMAP[5];
     const float ITERATION_VALUE;
 
+    static const int COUNT_OF_CARS;
+
+    struct Point
+    {
+        Point(int x, int y);
+        int x;
+        int y;
+    };
+
+    static bool pt_in_polygon2(const Point &test, const std::vector<Point> &polygon);
+    static bool pt_in_polygon(const Point &test,const std::vector<Point> &polygon);
     float car_R;
 
-    static const int COUNT_OF_CARS;
     Car car[5];
-
 
    float speed, angle;
    float maxSpeed;

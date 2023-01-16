@@ -34,10 +34,8 @@ private:
     int schet;
     bool start;
     bool m_upDir, m_rightDir, m_downDir, m_leftDir;
-    // QGraphicsScene interface
     void carMovement();
     void carCollision();
-    void renderScene();
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;

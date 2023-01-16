@@ -4,46 +4,14 @@ import QtQuick.Controls
 Item {
     id: root
     width: 760; height: 340
-//    MultiPointTouchArea {
-//        anchors.fill: parent
-//        minimumTouchPoints: 1
-//        maximumTouchPoints: 5
-//        touchPoints: [
-//            TouchPoint {
-//                id: pointId1
-//            },
-//            TouchPoint {
-//                id: pointId2
-//            },
-//            TouchPoint {
-//                id: pointId3
-//            },
-//            TouchPoint {
-//                id: pointId4
-//            },
-//            TouchPoint {
-//                id: pointId5
-//            }
-//        ]
-//        Repeater {
-//            model: parent.touchPoints
-//            Rectangle {
-//                color: "white";
-//                x: modelData.x;
-//                y: modelData.y;
-//                width: 70;
-//                height: 30
-//                visible: modelData.pressed
-//            }
-//        }
-//    }
+
     Button {
         id: buttonRedo
         objectName: "buttonRedo"
         x: 51
         y: 215
         width: 77
-        height: 64
+        height: 51
         text: qsTr("redo")
         signal pressedMy()
         onPressed: pressedMy()
@@ -92,4 +60,38 @@ Item {
         signal relessedMy()
         onReleased: relessedMy()
     }
+
+//    MultiPointTouchArea {
+//        anchors.fill: parent
+//        minimumTouchPoints: 1
+//        maximumTouchPoints: 5
+//        touchPoints: [
+//            TouchPoint {
+//                id: pointId1
+//            },
+//            TouchPoint {
+//                id: pointId2
+//            },
+//            TouchPoint {
+//                id: pointId3
+//            },
+//            TouchPoint {
+//                id: pointId4
+//            },
+//            TouchPoint {
+//                id: pointId5
+//            }
+//        ]
+//        Repeater {
+//            model: parent.touchPoints
+//            Rectangle {
+//                color: "white";
+//                x: modelData.x;
+//                y: modelData.y;
+//                width: 70;
+//                height: 30
+//                visible: modelData.pressed
+//            }
+//        }
+//    }
 }

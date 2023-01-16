@@ -13,7 +13,7 @@ GameScene::GameScene(QObject *parent)
     loadPixmap();
     setSceneRect(0, 0, Game::RESOLUTION.width(), Game::RESOLUTION.height());
     connect(m_timer, &QTimer::timeout, this, &GameScene::update);
-
+    start = false;
     schet = 0;
     update();
     schet = 0;
@@ -104,69 +104,71 @@ void GameScene::setUpDir(bool newUpDir)
 
 void GameScene::carMovement()
 {
-    if (m_upDir && m_game.speed < m_game.maxSpeed)
-    {
-        if (m_game.speed < 0)
+    if (start){
+        if (m_upDir && m_game.speed < m_game.maxSpeed)
         {
-            m_game.speed += m_game.dec;
+            if (m_game.speed < 0)
+            {
+                m_game.speed += m_game.dec;
+            }
+            else
+            {
+                m_game.speed += m_game.acc;
+            }
         }
-        else
+
+        if (m_downDir && m_game.speed > -m_game.maxSpeed)
         {
-            m_game.speed += m_game.acc;
+            if (m_game.speed > 0)
+            {
+                m_game.speed -= m_game.dec;
+            }
+            else
+            {
+                m_game.speed -= m_game.acc;
+            }
         }
-    }
 
-    if (m_downDir && m_game.speed > -m_game.maxSpeed)
-    {
-        if (m_game.speed > 0)
+
+        if (!m_upDir && !m_downDir)
         {
-            m_game.speed -= m_game.dec;
+            if (m_game.speed - m_game.dec > 0)
+            {
+                m_game.speed -= m_game.dec;
+            }
+            else if (m_game.speed + m_game.dec < 0)
+            {
+                m_game.speed += m_game.dec;
+            }
+            else
+            {
+                m_game.speed = 0;
+            }
         }
-        else
+
+
+        if (m_rightDir && m_game.speed!=0)
         {
-            m_game.speed -= m_game.acc;
+            m_game.angle += m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
         }
-    }
 
-
-    if (!m_upDir && !m_downDir)
-    {
-        if (m_game.speed - m_game.dec > 0)
+        if (m_leftDir && m_game.speed!=0)
         {
-            m_game.speed -= m_game.dec;
+            m_game.angle -= m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
         }
-        else if (m_game.speed + m_game.dec < 0)
+
+        m_game.car[0].speed = m_game.speed;
+        m_game.car[0].angle = m_game.angle;
+
+        for(int i = 0; i < m_game.COUNT_OF_CARS; i++)
         {
-            m_game.speed += m_game.dec;
+            m_game.car[i].move();
         }
-        else
+
+        for(int i=1; i < m_game.COUNT_OF_CARS ;i++)
         {
-            m_game.speed = 0;
+            m_game.car[i].findTarget();
         }
-    }
-
-
-    if (m_rightDir && m_game.speed!=0)
-    {
-        m_game.angle += m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
-    }
-
-    if (m_leftDir && m_game.speed!=0)
-    {
-        m_game.angle -= m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
-    }
-
-    m_game.car[0].speed = m_game.speed;
-    m_game.car[0].angle = m_game.angle;
-
-    for(int i = 0; i < m_game.COUNT_OF_CARS; i++)
-    {
-        m_game.car[i].move();
-    }
-
-    for(int i=1; i < m_game.COUNT_OF_CARS ;i++)
-    {
-        m_game.car[i].findTarget();
     }
 }
 
@@ -174,6 +176,26 @@ void GameScene::carCollision()
 {
     for(int i = 0; i < Game::COUNT_OF_CARS;i++)
     {
+        if( m_game.car[i].x  < 50 ) {
+            m_game.car[i].x = 50;
+        } else if ( m_game.car[i].x > 2750 ) {
+            m_game.car[i].x = 2750;
+        }
+        if (m_game.car[i].y < 250 ) {
+            m_game.car[i].y = 250;
+        } else if ( m_game.car[i].y > 3500 ) {
+            m_game.car[i].y = 3500;
+        }
+
+        std::vector<Game::Point> rect = {Game::Point(500,500), Game::Point(500,3000),
+                                         Game::Point(2250,3000), Game::Point(2250,500),
+                                         Game::Point(500,500)};
+        Game::Point point(m_game.car[i].x, m_game.car[i].x);
+        if(i == 0){
+            qDebug()<< "Game::pt_in_polygon2(point, rect)";
+            qDebug()<< Game::pt_in_polygon2(point, rect);
+            qDebug()<< Game::pt_in_polygon(point, rect);
+        }
         for(int j=0; j<Game::COUNT_OF_CARS;j++)
         {
             int dx=0, dy=0;
@@ -194,22 +216,12 @@ void GameScene::carCollision()
     }
 }
 
-void GameScene::renderScene()
-{
-//    static int index = 0;
-//    QString fileName = QDir::currentPath() + QDir::separator() + "screen" + QString::number(index++) + ".png";
-//    QRect rect = sceneRect().toAlignedRect();
-//    QImage image(rect.size(), QImage::Format_ARGB32);
-//    image.fill(Qt::transparent);
-//    QPainter painter(&image);
-//    render(&painter);
-//    image.save(fileName);
-//    qDebug() << "saved " << fileName;
-}
+
 
 void GameScene::update()
 {
     clear();
+    setBackgroundBrush(QBrush(Qt::gray));
     QGraphicsPixmapItem* bgItem = new QGraphicsPixmapItem(m_bgPixmap);
     bgItem->setTransformationMode(Qt::SmoothTransformation);
     bgItem->setScale(2);
@@ -300,11 +312,6 @@ void GameScene::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Left:
         {
             m_leftDir = true;
-        }
-            break;
-        case Qt::Key_Z:
-        {
-            renderScene();
         }
             break;
         }
