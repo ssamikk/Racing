@@ -1,7 +1,8 @@
 #include "car.h"
+#include "game.h"
 
 Car::Car(int _num_checkpoints, const int _points[8][2])
-    : speed(2), angle(0), n(0)
+    : speed(2), angle(0), n(0), laps(0), finishZone(false)
 {
     num_checkpoints = _num_checkpoints;
     for(int i = 0; i < num_checkpoints; ++i)
@@ -35,5 +36,32 @@ void Car::findTarget()
     if ((x-tx)*(x-tx)+(y-ty)*(y-ty)<25*25)
     {
         n=(n+1) % num_checkpoints;
+    }
+}
+
+bool Car::getFinishZone() const
+{
+    return finishZone;
+}
+
+void Car::setFinishZone(bool newFinishZone)
+{
+    finishZone = newFinishZone;
+}
+
+int Car::getLaps() const
+{
+    return laps;
+}
+
+void Car::setLaps(bool newLaps)
+{
+    if (newLaps){
+        laps++;
+    } else {
+        laps--;
+    }
+    if (laps >= Game::COUNT_OF_LAPS) {
+        speed = 0;
     }
 }

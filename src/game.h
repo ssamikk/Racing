@@ -2,6 +2,7 @@
 #define GAME_H
 #include "car.h"
 #include <QPoint>
+#include <QPolygon>
 #include <QSize>
 
 class Game
@@ -18,26 +19,20 @@ public:
     const float ITERATION_VALUE;
 
     static const int COUNT_OF_CARS;
+    static const int COUNT_OF_LAPS;
+    static const QPolygon RECT;
+    static const QPolygon RECT_FINISH;
 
-    struct Point
-    {
-        Point(int x, int y);
-        int x;
-        int y;
-    };
-
-    static bool pt_in_polygon2(const Point &test, const std::vector<Point> &polygon);
-    static bool pt_in_polygon(const Point &test,const std::vector<Point> &polygon);
     float car_R;
 
     Car car[5];
 
-   float speed, angle;
-   float maxSpeed;
-   float acc, dec;
-   float turnSpeed;
+    float speed, angle;
+    float maxSpeed;
+    float acc, dec;
+    float turnSpeed;
 
-   int offsetX,offsetY;
+    int offsetX,offsetY;
 };
 
 #endif // GAME_H

@@ -33,6 +33,7 @@ private:
     QPixmap m_bgPixmap, m_carPixmap[5];
     int schet;
     bool start;
+    bool stop;
     bool m_upDir, m_rightDir, m_downDir, m_leftDir;
     void carMovement();
     void carCollision();

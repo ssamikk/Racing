@@ -5,7 +5,6 @@
 
 #include <QtQuickWidgets/QtQuickWidgets>
 #include <QDebug>
-#include <QQuickitem>
 
 GeneralWindows::GeneralWindows(QWidget *parent) :
     QWidget(parent),
@@ -96,13 +95,6 @@ void GeneralWindows::resizeGameWidget()
     if(pqiRoot) {
         pqiRoot->setProperty ( "height", ui->graphicsView->viewport()->height());
         pqiRoot->setProperty ( "width", ui->graphicsView->viewport()->width());
-//        QObject* pObjText = pqiRoot->findChild<QObject*>("text");
-//        if (pObjText) (
-//        pObjText->setProperty ( "text", "С++") ;
-//        pObjText->setProperty ( "color", "Ыuе");
-//        QVariant varRet;
-//        QMetaObject::invokeMethod(pObjText,
-//        qDebug () << varRet;
     }
 }
 

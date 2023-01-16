@@ -12,7 +12,7 @@ Item {
         y: 215
         width: 77
         height: 51
-        text: qsTr("redo")
+        text: qsTr("Вперед")
         signal pressedMy()
         onPressed: pressedMy()
         signal relessedMy()
@@ -26,7 +26,7 @@ Item {
         y: 280
         width: 77
         height: 52
-        text: qsTr("beck")
+        text: qsTr("Назад")
         signal pressedMy()
         onPressed: pressedMy()
         signal relessedMy()
@@ -40,7 +40,7 @@ Item {
         y: 236
         width: 81
         height: 76
-        text: qsTr("left")
+        text: qsTr("Лево")
         signal pressedMy()
         onPressed: pressedMy()
         signal relessedMy()
@@ -54,44 +54,10 @@ Item {
         y: 236
         width: 88
         height: 76
-        text: qsTr("right")
+        text: qsTr("Право")
         signal pressedMy()
         onPressed: pressedMy()
         signal relessedMy()
         onReleased: relessedMy()
     }
-
-//    MultiPointTouchArea {
-//        anchors.fill: parent
-//        minimumTouchPoints: 1
-//        maximumTouchPoints: 5
-//        touchPoints: [
-//            TouchPoint {
-//                id: pointId1
-//            },
-//            TouchPoint {
-//                id: pointId2
-//            },
-//            TouchPoint {
-//                id: pointId3
-//            },
-//            TouchPoint {
-//                id: pointId4
-//            },
-//            TouchPoint {
-//                id: pointId5
-//            }
-//        ]
-//        Repeater {
-//            model: parent.touchPoints
-//            Rectangle {
-//                color: "white";
-//                x: modelData.x;
-//                y: modelData.y;
-//                width: 70;
-//                height: 30
-//                visible: modelData.pressed
-//            }
-//        }
-//    }
 }

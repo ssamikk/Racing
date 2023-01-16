@@ -8,7 +8,7 @@
 
 GameScene::GameScene(QObject *parent)
     : QGraphicsScene{parent}, m_game(), m_timer(new QTimer(this)),
-      m_upDir(false), m_rightDir(false), m_downDir(false), m_leftDir(false)
+      m_upDir(false), m_rightDir(false), m_downDir(false), m_leftDir(false), stop(false)
 {
     loadPixmap();
     setSceneRect(0, 0, Game::RESOLUTION.width(), Game::RESOLUTION.height());
@@ -79,7 +79,9 @@ void GameScene::loadPixmap()
 
 void GameScene::setLeftDir(bool newLeftDir)
 {
-    m_leftDir = newLeftDir;
+    if(start && !stop){
+        m_leftDir = newLeftDir;
+    }
 }
 
 void GameScene::startTimer()
@@ -89,80 +91,123 @@ void GameScene::startTimer()
 
 void GameScene::setDownDir(bool newDownDir)
 {
-    m_downDir = newDownDir;
+    if(start && !stop){
+        m_downDir = newDownDir;
+    }
 }
 
 void GameScene::setRightDir(bool newRightDir)
 {
-    m_rightDir = newRightDir;
+    if(start && !stop){
+        m_rightDir = newRightDir;
+    }
 }
 
 void GameScene::setUpDir(bool newUpDir)
 {
-    m_upDir = newUpDir;
+    if(start && !stop){
+        m_upDir = newUpDir;
+    }
 }
 
 void GameScene::carMovement()
 {
     if (start){
-        if (m_upDir && m_game.speed < m_game.maxSpeed)
-        {
-            if (m_game.speed < 0)
+        if(!stop){
+            if (m_upDir && m_game.speed < m_game.maxSpeed)
             {
-                m_game.speed += m_game.dec;
+                if (m_game.speed < 0)
+                {
+                    m_game.speed += m_game.dec;
+                }
+                else
+                {
+                    m_game.speed += m_game.acc;
+                }
             }
-            else
+
+            if (m_downDir && m_game.speed > -m_game.maxSpeed)
             {
-                m_game.speed += m_game.acc;
+                if (m_game.speed > 0)
+                {
+                    m_game.speed -= m_game.dec;
+                }
+                else
+                {
+                    m_game.speed -= m_game.acc;
+                }
             }
+
+
+            if (!m_upDir && !m_downDir)
+            {
+                if (m_game.speed - m_game.dec > 0)
+                {
+                    m_game.speed -= m_game.dec;
+                }
+                else if (m_game.speed + m_game.dec < 0)
+                {
+                    m_game.speed += m_game.dec;
+                }
+                else
+                {
+                    m_game.speed = 0;
+                }
+            }
+
+
+            if (m_rightDir && m_game.speed!=0)
+            {
+                m_game.angle += m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
+            }
+
+            if (m_leftDir && m_game.speed!=0)
+            {
+                m_game.angle -= m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
+            }
+
+            m_game.car[0].speed = m_game.speed;
+            m_game.car[0].angle = m_game.angle;
+        } else {
+            m_game.car[0].speed = 0;
+            m_game.car[0].angle = 0;
         }
-
-        if (m_downDir && m_game.speed > -m_game.maxSpeed)
-        {
-            if (m_game.speed > 0)
-            {
-                m_game.speed -= m_game.dec;
-            }
-            else
-            {
-                m_game.speed -= m_game.acc;
-            }
-        }
-
-
-        if (!m_upDir && !m_downDir)
-        {
-            if (m_game.speed - m_game.dec > 0)
-            {
-                m_game.speed -= m_game.dec;
-            }
-            else if (m_game.speed + m_game.dec < 0)
-            {
-                m_game.speed += m_game.dec;
-            }
-            else
-            {
-                m_game.speed = 0;
-            }
-        }
-
-
-        if (m_rightDir && m_game.speed!=0)
-        {
-            m_game.angle += m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
-        }
-
-        if (m_leftDir && m_game.speed!=0)
-        {
-            m_game.angle -= m_game.turnSpeed * m_game.speed/m_game.maxSpeed;
-        }
-
-        m_game.car[0].speed = m_game.speed;
-        m_game.car[0].angle = m_game.angle;
 
         for(int i = 0; i < m_game.COUNT_OF_CARS; i++)
         {
+            QPoint old(m_game.car[i].x, m_game.car[i].y);
             m_game.car[i].move();
+            QPoint newPoint(m_game.car[i].x, m_game.car[i].y);
+            if (Game::RECT.containsPoint(newPoint, Qt::WindingFill)){
+                if (!Game::RECT.containsPoint(QPoint(old.x(), newPoint.y()), Qt::WindingFill)){
+                    m_game.car[i].x = old.x();
+                } else if (!Game::RECT.containsPoint(QPoint(newPoint.x(), old.y()), Qt::WindingFill)){
+                    m_game.car[i].y = old.y();
+                } else {
+                    m_game.car[i].x = old.x();
+                    m_game.car[i].y = old.y();
+                }
+            }
+            newPoint = QPoint(m_game.car[i].x, m_game.car[i].y);
+            if( !m_game.car[i].getFinishZone() && Game::RECT_FINISH.containsPoint(newPoint, Qt::WindingFill) ) {
+                m_game.car[i].setFinishZone(true);
+                if (old.y() > Game::RECT_FINISH.boundingRect().bottom()) {
+                    m_game.car[i].setLaps(true);
+                } else if (old.y() < Game::RECT_FINISH.boundingRect().top()){
+                    m_game.car[i].setLaps(false);
+                }
+            } else if (m_game.car[i].getFinishZone() && !Game::RECT_FINISH.containsPoint(newPoint, Qt::WindingFill) ){
+                m_game.car[i].setFinishZone(false);
+                if (newPoint.y() < Game::RECT_FINISH.boundingRect().top()){
+                    m_game.car[i].setLaps(true);
+                } else if (newPoint.y() > Game::RECT_FINISH.boundingRect().bottom()) {
+                    m_game.car[i].setLaps(false);
+                }
+            }
+        }
+
+        if ( m_game.car[0].getLaps() >= Game::COUNT_OF_LAPS ) {
+            stop = true;
         }
 
         for(int i=1; i < m_game.COUNT_OF_CARS ;i++)
@@ -187,15 +232,6 @@ void GameScene::carCollision()
             m_game.car[i].y = 3500;
         }
 
-        std::vector<Game::Point> rect = {Game::Point(500,500), Game::Point(500,3000),
-                                         Game::Point(2250,3000), Game::Point(2250,500),
-                                         Game::Point(500,500)};
-        Game::Point point(m_game.car[i].x, m_game.car[i].x);
-        if(i == 0){
-            qDebug()<< "Game::pt_in_polygon2(point, rect)";
-            qDebug()<< Game::pt_in_polygon2(point, rect);
-            qDebug()<< Game::pt_in_polygon(point, rect);
-        }
         for(int j=0; j<Game::COUNT_OF_CARS;j++)
         {
             int dx=0, dy=0;
@@ -238,6 +274,14 @@ void GameScene::update()
     {
         m_game.offsetY = m_game.car[0].y-120;
     }
+
+//    QGraphicsPolygonItem* zaborItem = new QGraphicsPolygonItem(Game::RECT_FINISH);
+//    zaborItem->setFillRule(Qt::WindingFill);
+//    zaborItem->setPen(QPen(Qt::yellow));
+//    zaborItem->setBrush(QBrush(Qt::yellow));
+//    addItem(zaborItem);
+//    zaborItem->setPos(-m_game.offsetX, -m_game.offsetY);
+
     bgItem->setPos(-m_game.offsetX, -m_game.offsetY);
 
     for(int i=0; i < Game::COUNT_OF_CARS; i++)
@@ -250,6 +294,17 @@ void GameScene::update()
         carItem->setPos(m_game.car[i].x - m_game.offsetX, m_game.car[i].y - m_game.offsetY);
         carItem->setRotation(m_game.car[i].angle * 180/3.141593);
         addItem(carItem);
+
+//        QGraphicsTextItem* schetItem = new QGraphicsTextItem();
+//        schetItem->setTransformOriginPoint(21, 34);
+//        QFont font = schetItem->font();
+//        font.setPointSize(42);
+//        font.setBold(true);
+//        schetItem->setDefaultTextColor(Qt::magenta);
+//        schetItem->setFont(font);
+//        schetItem->setPos(m_game.car[i].x  - m_game.offsetX, m_game.car[i].y  - m_game.offsetY);
+//        schetItem->setPlainText(tr("Laps: %1").arg(m_game.car[i].getLaps()));
+//        addItem(schetItem);
     }
 
     if (schet < 3000){
@@ -288,7 +343,7 @@ void GameScene::update()
 
 void GameScene::keyPressEvent(QKeyEvent *event)
 {
-    if (start) {
+    if (start && !stop) {
         switch (event->key()) {
         case Qt::Key_Up:
         case Qt::Key_W:
@@ -321,7 +376,7 @@ void GameScene::keyPressEvent(QKeyEvent *event)
 
 void GameScene::keyReleaseEvent(QKeyEvent *event)
 {
-    if (start) {
+    if (start && !stop) {
         switch (event->key()) {
         case Qt::Key_Up:
         case Qt::Key_W:
