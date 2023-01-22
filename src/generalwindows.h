@@ -8,6 +8,8 @@
 
 class GameScene;
 class QQuickWidget;
+class QSqlQueryModel;
+
 namespace Ui {
 class GeneralWindows;
 }
@@ -19,7 +21,7 @@ class GeneralWindows : public QWidget
 public:
     explicit GeneralWindows(QWidget *parent = nullptr);
     ~GeneralWindows();
-
+    static bool createConnection();
 private slots:
     void about_clicked();
 
@@ -45,11 +47,13 @@ private slots:
 
     void rightRelessed();
 
-    void liderClicked();
+    void lider_clicked();
+
 private:
     Ui::GeneralWindows *ui;
     GameScene *m_gameScene;
     QQuickWidget *quickWidget;
+    QSqlQueryModel *model;
 };
 
 #endif // GENERALWINDOWS_H

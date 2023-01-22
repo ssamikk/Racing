@@ -19,7 +19,12 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (!GeneralWindows::createConnection()){
+        return -5;
+    }
+
     GeneralWindows windows;
+
     windows.show();
 
     return app.exec();

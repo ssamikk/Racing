@@ -68,6 +68,9 @@ void Car::setLaps(bool newLaps)
 
 void Car::stopGame(QTime start)
 {
+    if ( stop.isValid() ) {
+        return;
+    }
     stop = QTime::fromMSecsSinceStartOfDay(start.msecsTo(QTime::currentTime()));
 }
 

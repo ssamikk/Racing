@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QPainter>
 #include <QMessageBox>
+#include <QSqlQuery>
 
 GameScene::GameScene(QObject *parent)
     : QGraphicsScene{parent}, m_game(), m_timer(new QTimer(this)),
@@ -372,20 +373,47 @@ void GameScene::update()
         finishGame->setPlainText(first ? utr("Победа!!!") : utr("Проиграл :)"));
         addItem(finishGame);
         m_timer->stop();
-        switch (QMessageBox::question(0, utr("Игра окончена"), utr("Хотите сыграть ещё?"), utr("Да"), utr("Нет"), utr("Таблица лидеров"), 1, 1)) {
-        case 0:
+        QSqlQuery query;
+        for(int i = 0; i < vector.size(); i++ ) {
+            Car car = vector[i];
+            query.exec(utr("insert into person values('%1', %2, '%3')").arg(car.getName())
+                       .arg(car.getStop().msecsSinceStartOfDay()).arg(car.getStop().toString("mm:ss:z")));
+        }
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(utr("Игра окончена"));
+        msgBox.setText(utr("Хотите сыграть ещё?"));
+//        msgBox.setInformativeText("Do you want to save your changes?");
+        QPushButton *tableButton = msgBox.addButton(utr("Таблица лидеров"), QMessageBox::ActionRole);
+        QPushButton *noButton = msgBox.addButton(utr("Нет"), QMessageBox::NoRole);
+        QPushButton *yesButton = msgBox.addButton(utr("Да"), QMessageBox::YesRole);
+
+        msgBox.exec();
+
+        m_game.ready();
+
+        if (msgBox.clickedButton() == (QAbstractButton*)yesButton) {
             m_game.ready();
             startTimer();
-            break;
-        case 2:
-            m_game.ready();
-            emit liderBoard();
-            break;
-        default:
-            m_game.ready();
+        } else if (msgBox.clickedButton() == (QAbstractButton*)noButton) {
             emit startWindow();
-            break;
+        } else {
+            emit liderBoard();
         }
+
+//        switch (QMessageBox::question(0, utr("Игра окончена"), utr("Хотите сыграть ещё?"), utr("Да"), utr("Нет"), utr("Таблица лидеров"), 1, 1)) {
+//        case 0:
+//            m_game.ready();
+//            startTimer();
+//            break;
+//        case 2:
+//            m_game.ready();
+//            emit liderBoard();
+//            break;
+//        default:
+//            m_game.ready();
+//            emit startWindow();
+//            break;
+//        }
     }
 }
 

@@ -5,6 +5,9 @@
 
 #include <QtQuickWidgets/QtQuickWidgets>
 #include <QDebug>
+#include <QSqlTableModel>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 
 GeneralWindows::GeneralWindows(QWidget *parent) :
     QWidget(parent),
@@ -12,17 +15,26 @@ GeneralWindows::GeneralWindows(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    model = new QSqlQueryModel(this);
+    model->setQuery("SELECT lastname, time_str FROM person order by time_lap");
+
+    model->setHeaderData(0, Qt::Horizontal, utr("Участник"));
+    model->setHeaderData(1, Qt::Horizontal, utr("Время"));
+
+    ui->tableView->setModel(model);
+    ui->tableView->hideColumn(2);
+
     connect(ui->buttonBack, &QPushButton::clicked, this, &GeneralWindows::back_clicked);
     connect(ui->buttonBack2, &QPushButton::clicked, this, &GeneralWindows::back_clicked);
     connect(ui->buttonGame, &QPushButton::clicked, this, &GeneralWindows::game_clicked);
     connect(ui->buttonAbout, &QPushButton::clicked, this, &GeneralWindows::about_clicked);
-    connect(ui->buttonLider, &QPushButton::clicked, this, &GeneralWindows::liderClicked);
+    connect(ui->buttonLider, &QPushButton::clicked, this, &GeneralWindows::lider_clicked);
 
     back_clicked();
 
     ui->graphicsView->setScene(m_gameScene);
     connect(m_gameScene, &GameScene::startWindow, this, &GeneralWindows::back_clicked);
-    connect(m_gameScene, &GameScene::liderBoard, this, &GeneralWindows::liderClicked);
+    connect(m_gameScene, &GameScene::liderBoard, this, &GeneralWindows::lider_clicked);
     resize(m_gameScene->sceneRect().width()+2, m_gameScene->sceneRect().height()+2);
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -127,9 +139,34 @@ void GeneralWindows::rightRelessed()
     m_gameScene->setRightDir(false);
 }
 
-void GeneralWindows::liderClicked()
+void GeneralWindows::lider_clicked()
 {
+    model->setQuery("SELECT lastname, time_str, time_lap FROM person order by time_lap");
+    ui->tableView->hideColumn(2);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     ui->stackedWidget->setCurrentIndex(3);
+}
+
+bool GeneralWindows::createConnection()
+{
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+
+    db.setDatabaseName("racingdatabase.data");
+    if (!db.open()) {
+        QMessageBox::critical(nullptr, QObject::tr("Cannot open database"),
+                              QObject::tr("Unable to establish a database connection.\n"
+                                          "This example needs SQLite support. Please read "
+                                          "the Qt SQL driver documentation for information how "
+                                          "to build it.\n\n"
+                                          "Click Cancel to exit."), QMessageBox::Cancel);
+        return false;
+    }
+
+    QSqlQuery query;
+    query.exec("create table person (lastname varchar(40), time_lap int, time_str varchar(20))");
+
+    return true;
 }
 
 void GeneralWindows::leftPressed()
