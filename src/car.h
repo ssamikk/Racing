@@ -1,7 +1,8 @@
 #ifndef CAR_H
 #define CAR_H
+
+#include <QString>
 #include <QTime>
-#include <cmath>
 
 #ifndef utr
 # define utr QString::fromUtf8
