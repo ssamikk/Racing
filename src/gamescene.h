@@ -5,6 +5,8 @@
 #include <QPixmap>
 #include "game.h"
 
+
+
 class QTimer;
 class GameScene : public QGraphicsScene
 {
@@ -22,6 +24,8 @@ public:
 
     void startTimer();
 signals:
+    void startWindow();
+    void liderBoard();
 private slots:
     void update();
 

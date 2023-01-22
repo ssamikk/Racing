@@ -4,12 +4,15 @@
 #include <QPoint>
 #include <QPolygon>
 #include <QSize>
+#include <QTime>
 
 class Game
 {
 public:
     Game();
+    void ready();
     void start();
+    void stopGame(int carNumber);
     static const int num_checkpoints;
     static const int points[8][2];
     static const QSize RESOLUTION;
@@ -33,6 +36,8 @@ public:
     float turnSpeed;
 
     int offsetX,offsetY;
+protected:
+    QTime startGame;
 };
 
 #endif // GAME_H

@@ -44,6 +44,8 @@ private slots:
     void leftRelessed();
 
     void rightRelessed();
+
+    void liderClicked();
 private:
     Ui::GeneralWindows *ui;
     GameScene *m_gameScene;

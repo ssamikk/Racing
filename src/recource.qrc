@@ -6,6 +6,6 @@
         <file>images/car2.png</file>
         <file>images/car3.png</file>
         <file>images/car4.png</file>
-        <file>button.qml</file>
+        <file alias="racing/src/main.qml">main.qml</file>
     </qresource>
 </RCC>

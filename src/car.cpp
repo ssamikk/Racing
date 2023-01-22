@@ -65,3 +65,23 @@ void Car::setLaps(bool newLaps)
         speed = 0;
     }
 }
+
+void Car::stopGame(QTime start)
+{
+    stop = QTime::fromMSecsSinceStartOfDay(start.msecsTo(QTime::currentTime()));
+}
+
+QString Car::getName() const
+{
+    return name;
+}
+
+void Car::setName(const QString &value)
+{
+    name = value;
+}
+
+QTime Car::getStop() const
+{
+    return stop;
+}

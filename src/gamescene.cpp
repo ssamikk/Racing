@@ -5,18 +5,15 @@
 #include <QKeyEvent>
 #include <QDir>
 #include <QPainter>
+#include <QMessageBox>
 
 GameScene::GameScene(QObject *parent)
     : QGraphicsScene{parent}, m_game(), m_timer(new QTimer(this)),
-      m_upDir(false), m_rightDir(false), m_downDir(false), m_leftDir(false), stop(false)
+      m_upDir(false), m_rightDir(false), m_downDir(false), m_leftDir(false), stop(false), start(false)
 {
     loadPixmap();
     setSceneRect(0, 0, Game::RESOLUTION.width(), Game::RESOLUTION.height());
     connect(m_timer, &QTimer::timeout, this, &GameScene::update);
-    start = false;
-    schet = 0;
-    update();
-    schet = 0;
 }
 
 void GameScene::loadPixmap()
@@ -86,6 +83,16 @@ void GameScene::setLeftDir(bool newLeftDir)
 
 void GameScene::startTimer()
 {
+    start = false;
+    stop = false;
+    m_upDir = false;
+    m_rightDir = false;
+    m_downDir = false;
+    m_leftDir = false;
+    m_game.ready();
+    schet = 0;
+    update();
+    schet = 0;
     m_timer->start(m_game.ITERATION_VALUE);
 }
 
@@ -204,10 +211,12 @@ void GameScene::carMovement()
                     m_game.car[i].setLaps(false);
                 }
             }
-        }
-
-        if ( m_game.car[0].getLaps() >= Game::COUNT_OF_LAPS ) {
-            stop = true;
+            if (m_game.car[i].getLaps() >= Game::COUNT_OF_LAPS) {
+                m_game.stopGame(i);
+                if (i == 0) {
+                    stop = true;
+                }
+            }
         }
 
         for(int i=1; i < m_game.COUNT_OF_CARS ;i++)
@@ -251,8 +260,6 @@ void GameScene::carCollision()
         }
     }
 }
-
-
 
 void GameScene::update()
 {
@@ -338,6 +345,47 @@ void GameScene::update()
         schetItem->setPos(m_game.car[0].x  - m_game.offsetX + 150, m_game.car[0].y  - m_game.offsetY - 100 );
         schetItem->setPlainText("Go");
         addItem(schetItem);
+    } else if (stop) {
+        QVector<Car> vector;
+        vector << m_game.car[0];
+        bool first = true;
+        for(int i=1; i < Game::COUNT_OF_CARS; i++)
+        {
+            for(int j=0; j < vector.size(); j++)
+            {
+                if (m_game.car[i].getStop().isValid() && m_game.car[i].getStop() <= vector[j].getStop()){
+                    vector.append(m_game.car[i]);
+                    first = false;
+                    break;
+                }
+            }
+        }
+
+        QGraphicsTextItem* finishGame = new QGraphicsTextItem();
+        finishGame->setTransformOriginPoint(21, 34);
+        QFont font = finishGame->font();
+        font.setPointSize(42);
+        font.setBold(true);
+        finishGame->setDefaultTextColor(Qt::yellow);
+        finishGame->setFont(font);
+        finishGame->setPos(m_game.car[0].x  - m_game.offsetX + 150, m_game.car[0].y  - m_game.offsetY - 100 );
+        finishGame->setPlainText(first ? utr("Победа!!!") : utr("Проиграл :)"));
+        addItem(finishGame);
+        m_timer->stop();
+        switch (QMessageBox::question(0, utr("Игра окончена"), utr("Хотите сыграть ещё?"), utr("Да"), utr("Нет"), utr("Таблица лидеров"), 1, 1)) {
+        case 0:
+            m_game.ready();
+            startTimer();
+            break;
+        case 2:
+            m_game.ready();
+            emit liderBoard();
+            break;
+        default:
+            m_game.ready();
+            emit startWindow();
+            break;
+        }
     }
 }
 

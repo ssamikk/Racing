@@ -13,12 +13,16 @@ GeneralWindows::GeneralWindows(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->buttonBack, &QPushButton::clicked, this, &GeneralWindows::back_clicked);
+    connect(ui->buttonBack2, &QPushButton::clicked, this, &GeneralWindows::back_clicked);
     connect(ui->buttonGame, &QPushButton::clicked, this, &GeneralWindows::game_clicked);
     connect(ui->buttonAbout, &QPushButton::clicked, this, &GeneralWindows::about_clicked);
+    connect(ui->buttonLider, &QPushButton::clicked, this, &GeneralWindows::liderClicked);
 
     back_clicked();
 
     ui->graphicsView->setScene(m_gameScene);
+    connect(m_gameScene, &GameScene::startWindow, this, &GeneralWindows::back_clicked);
+    connect(m_gameScene, &GameScene::liderBoard, this, &GeneralWindows::liderClicked);
     resize(m_gameScene->sceneRect().width()+2, m_gameScene->sceneRect().height()+2);
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -121,6 +125,11 @@ void GeneralWindows::leftRelessed()
 void GeneralWindows::rightRelessed()
 {
     m_gameScene->setRightDir(false);
+}
+
+void GeneralWindows::liderClicked()
+{
+    ui->stackedWidget->setCurrentIndex(3);
 }
 
 void GeneralWindows::leftPressed()
